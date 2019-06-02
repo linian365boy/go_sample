@@ -99,7 +99,7 @@ func TimeEncoder(t time.Time, enc zapcore.PrimitiveArrayEncoder) {
 	enc.AppendString(t.Format("2006-01-02 15:04:05.000"))
 }
 
-func Init(opts ...Option) error {
+func Init(opts ...Option) (*logWrapper, error) {
 	options := newOptions()
 	for _, opt := range opts {
 		opt(options)
@@ -185,7 +185,7 @@ func Init(opts ...Option) error {
 
 	logwrapper = NewLogWrapper(logger)
 
-	return err
+	return logwrapper, err
 }
 
 func GetZapLogger() *zap.Logger {
