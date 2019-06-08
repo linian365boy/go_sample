@@ -3,20 +3,41 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"go_sample/handler"
-	"go_sample/logkit"
-	"go_sample/middleware"
 )
 
-var logger *logWrapper
+func main() {
+	router := gin.New()
 
-func init() {
-	// zapLog.InitLog()
-	logger, _ = logkit.Init(logkit.EnableCaller(true))
+	router.Use(Loggers())
+
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(200, "Hello world!")
+	})
+
+	router.GET("/ping", myHandler)
+
+	router.Run(":8080")
 }
 
-func main() {
-	r := gin.Default()
-	r.Use(gin.Recovery())
-	r.GET("/ping", middleware.RequestLogMiddleware(logger), handler.LogHandler)
-	r.Run()
+func myHandler(c *gin.Context){
+	logger, err := handler.NewProductionLogger()
+	if err != nil {
+		panic(err)
+	}
+	logger.Info("heheda.......")
+	c.JSON(200, "Fuck hehe.")
+	logger.Info("heheda.......")
+}
+
+func Loggers() gin.HandlerFunc {
+	logger, err := handler.NewProductionLogger()
+	if err != nil {
+		panic(err)
+	}
+
+	return handler.Logger(logger, handler.Options{
+		RequestBodyLimit:  2000,
+		RequestQueryLimit: 2000,
+		ResponseBodyLimit: 2000,
+	})
 }
